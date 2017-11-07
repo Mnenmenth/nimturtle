@@ -2,15 +2,17 @@ import sdl2.sdl
 import graph
 import algorithm
 import math
-from turtle_global import g
 
 type
     Triangle* = ref object of RootObj
-        vert1*: graph.Coordinate
-        vert2*: graph.Coordinate
-        vert3*: graph.Coordinate
+        vert1*: Coordinate
+        vert2*: Coordinate
+        vert3*: Coordinate
 
-proc rot_point(affected: var graph.Coordinate, triangle_point: var graph.Coordinate, angle: float) =
+proc newTriangle*(vert1, vert2, vert3: Coordinate): Triangle =
+    Triangle(vert1: vert1, vert2: vert2, vert3: vert3)
+
+proc rot_point(affected: var Coordinate, triangle_point: var Coordinate, angle: float) =
     
         let pi = arccos(float32(-1))
         let rot_angle = angle / 180.0 * pi
@@ -31,7 +33,7 @@ proc rotate*(triangle: Triangle, angle: float) =
     triangle.vert2.rot_point(triangle.vert1, angle)
     triangle.vert3.rot_point(triangle.vert1, angle)
 
-proc drawTriangle*(renderer: sdl.Renderer, triangle: Triangle) =
+proc drawTriangle*(triangle: Triangle, g: Graph, renderer: sdl.Renderer) =
     let vert1 = g.c2p(triangle.vert1)
     let vert2 = g.c2p(triangle.vert2)
     let vert3 = g.c2p(triangle.vert3)

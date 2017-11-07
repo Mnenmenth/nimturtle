@@ -47,7 +47,20 @@ proc layer_cake(turtle: Turtle) =
 let bob = newTurtle()
 #bob.layer_cake()
 
-bob.pd()
+bob.fd(20)
+bob.lt(90)
+bob.fd(20)
+
+let fred = newTurtle()
+fred.lt(45)
+fred.fd(28.2842712475)
+
+fred.pu()
+fred.fd(200)
+bob.pu()
+bob.fd(200)
+
+#[bob.pd()
 bob.setcolor(255, 0, 0)
 bob.fd(40)
 
@@ -67,7 +80,7 @@ bob.rt(45)
 bob.fd(20)
 
 bob.lt(90)
-bob.fd(20)
+bob.fd(20)]#
 
 #bob.setcolor(124, 124, 124)
 #bob.setpos(-20, 40)

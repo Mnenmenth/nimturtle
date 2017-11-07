@@ -3,11 +3,11 @@ import sdl2.sdl
 
 import turtle/private/graph
 import turtle/private/triangle
-from turtle/private/turtle_global import g
 import turtle/private/frame_manager
+import turtle/private/movement
 import turtle/private/line
 
-let TURTLE_SIZE: graph.Dimension = graph.Dimension(width: 2, height: 4)
+let TURTLE_SIZE: Dimension = newDimension(2, 4)
 
 const
     Title = "Turtle"
@@ -16,7 +16,7 @@ const
     WindowFlags = 0
     RenderFlags = 0
 
-g.parentDim = graph.Dimension(width: Width, height: Height)
+let g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
 
 type
     Turtle* = ref object of RootObj
@@ -25,7 +25,7 @@ type
         heading: float
         penstatus: bool
         color: tuple[r: int, g: int, b: int]
-        lines: seq[Line]     
+        movements: seq[Movement]     
     App = ref object of RootObj
         window*: sdl.Window
         renderer*: sdl.Renderer
@@ -38,25 +38,27 @@ var
 
 proc newTurtle*(): Turtle =
     result = Turtle(
-        shape: Triangle(vert1: graph.Coordinate(x: 0, y: 0), vert2: graph.Coordinate(x: -TURTLE_SIZE.height.float, y: TURTLE_SIZE.width.float), vert3: graph.Coordinate(x: -TURTLE_SIZE.height.float, y: -TURTLE_SIZE.width.float)),
-        pos: graph.Coordinate(x: 0, y: 0),
-        heading: 90.0,
+        shape: newTriangle(newCoordinate(0, 0), newCoordinate(-TURTLE_SIZE.height.float, TURTLE_SIZE.width.float), newCoordinate(-TURTLE_SIZE.height.float, -TURTLE_SIZE.width.float)),
+        pos: newCoordinate(0, 0),
+        heading: 0.0,
         penstatus: true,
         color: (0, 0, 0),
-        lines: @[]
+        movements: @[]
     )
     turtles.add(result)
+
+proc update_rot(turtle: Turtle) =
+    turtle.shape.rotate(turtle.heading)
 
 proc setpos*(turtle: Turtle, x, y: float) =
 
     let oldx = turtle.pos.x
     let oldy = turtle.pos.y
 
-    if turtle.penstatus:
-        let line = Line(lineStart: graph.Coordinate(x: oldx, y: oldy), lineEnd: graph.Coordinate(x: x, y: y), color: turtle.color)
-        turtle.lines.add(line)
+    let movement = newMovement(newLine((oldx, oldy), (x ,y)), turtle.color, turtle.penstatus)
+    turtle.movements.add(movement)
 
-    turtle.pos = graph.Coordinate(x: x, y: y)
+    turtle.pos = newCoordinate(x, y)
     
     turtle.shape.vert1.x = x
     turtle.shape.vert1.y = y
@@ -67,6 +69,7 @@ proc setpos*(turtle: Turtle, x, y: float) =
     turtle.shape.vert3.x = x - TURTLE_SIZE.height.float
     turtle.shape.vert3.y = y - TURTLE_SIZE.width.float
     
+    turtle.update_rot()
 
 proc getpos*(turtle: Turtle): tuple[x: float, y: float] =
     turtle.pos.astuple()
@@ -101,11 +104,11 @@ proc fd*(turtle: Turtle, dist: float) =
 
 proc lt*(turtle: Turtle, angle: float) =
     turtle.setheading(turtle.heading+angle)
-    turtle.shape.rotate(turtle.heading)    
+    turtle.update_rot()    
 
 proc rt*(turtle: Turtle, angle: float) =
     turtle.setheading(turtle.heading-angle)
-    turtle.shape.rotate(turtle.heading)    
+    turtle.update_rot()    
 
 proc pu*(turtle: Turtle) =
     turtle.penstatus = false
@@ -114,12 +117,7 @@ proc pd*(turtle: Turtle) =
     turtle.penstatus = true
 
 proc draw*(turtle: Turtle, renderer: sdl.Renderer) =
-    #[var turtle_shape = Triangle(vert1: graph.Coordinate(x: 0, y: 0), vert2: graph.Coordinate(x: 0, y: 0), vert3: graph.Coordinate(x: 0, y: 0))
-    deepCopy(turtle_shape, turtle.shape)
-    turtle_shape.rotate(turtle.heading)
-    renderer.drawTriangle(turtle_shape)]#
-    #turtle.shape.rotate(turtle.heading)
-    renderer.drawTriangle(turtle.shape)
+    turtle.shape.drawTriangle(g, renderer)
 
 proc init(app: App): bool =
     if sdl.init(sdl.InitVideo or sdl.InitTimer) != 0:
@@ -158,7 +156,7 @@ proc init(app: App): bool =
 
     app.window.setWindowSize(w, h)
     app.window.setWindowPosition(sdl.WindowPosCentered, sdl.WindowPosCentered)
-    g.parentDim = graph.Dimension(width: w, height: h)
+    g.parentDim = newDimension(w, h)
 
     echo "SDL init successfully"
     return true
@@ -206,12 +204,13 @@ proc mainloop*() =
 
             discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
 
-            for c in turtles:
-                for line in c.lines:
-                    discard app.renderer.setRenderDrawColor(uint8(line.color.r), uint8(line.color.g), uint8(line.color.b), 0)                                        
-                    line.draw(app.renderer)
+            for t in turtles:
+                for m in t.movements:
+                    if m.visible:
+                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)                                        
+                        m.draw(g, app.renderer)
                 discard app.renderer.setRenderDrawColor(0, 0, 0, 0)                    
-                c.draw(app.renderer)
+                t.draw(app.renderer)
 
             app.renderer.renderPresent()
             done = events(pressed)
