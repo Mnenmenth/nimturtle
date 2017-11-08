@@ -3,7 +3,7 @@
 version       = "0.1.2"
 author        = "Earl Kennedy"
 description   = "Turtle Graphics using SDL"
-license       = "Apache"
+license       = "MIT"
 
 srcDir        = "src"
 #binDir        = "bin"
