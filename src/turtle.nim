@@ -36,8 +36,11 @@ var
     pressed: seq[sdl.Keycode] = @[]
     turtles: seq[Turtle] = @[]
     sdl_init: bool = false
+    skip_animation: bool = false
 
-const FPS: int = 100
+proc set_skip_animation*(skip: bool) = skip_animation = skip
+
+const FPS: int = 60
 var fpsMgr = newFpsManager(FPS)
 let g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
     
@@ -80,7 +83,7 @@ method goto*(turtle: Turtle, x, y: float) {.base.} =
     let oldx = turtle.pos.x
     let oldy = turtle.pos.y
 
-    let movement = newMovement(newLine((oldx, oldy), (x, y)), turtle.heading, turtle.color, turtle.penstatus)
+    let movement = newMovement(newLine((oldx, oldy), (x, y)), turtle.heading, turtle.color, turtle.penstatus, skip_animation)
     turtle.movements.add(movement)
 
     turtle.setpos(x, y)
@@ -128,17 +131,17 @@ method fd*(turtle: Turtle, dist: float) {.base.} =
     let roundy = round(y * roundnum) / roundnum
 
     turtle.goto(roundx, roundy)
-    update_screen(newManager=true)
+    if not skip_animation: update_screen(newManager=true)
 
 method lt*(turtle: Turtle, angle: float) {.base.} =
     turtle.setheading(turtle.heading+angle)
     turtle.update_rot()
-    update_screen(newManager=true)
+    if not skip_animation: update_screen(newManager=true)
 
 method rt*(turtle: Turtle, angle: float) {.base.} =
     turtle.setheading(turtle.heading-angle)
     turtle.update_rot()
-    update_screen(newManager=true)
+    if not skip_animation: update_screen(newManager=true)
 
 method pu*(turtle: Turtle) {.base.} =
     turtle.penstatus = false
@@ -252,14 +255,14 @@ proc update_screen(newManager: bool) =
                             tempLine.lineEnd.x += slopex
                             tempLine.lineEnd.y += slopey
 
-                            for t in turtles:
-                                for m in t.movements:
-                                    if m.animated and m.visible:
-                                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                                        m.draw(g, app.renderer)
+                            for t1 in turtles:
+                                for m1 in t1.movements:
+                                    if m1.animated and m1.visible:
+                                        discard app.renderer.setRenderDrawColor(uint8(m1.color.r), uint8(m1.color.g), uint8(m1.color.b), 0)
+                                        m1.draw(g, app.renderer)
                                         done = events(pressed)
                                         if done: break update
-                                t.draw(app.renderer)
+                                if t != t1: t1.draw(app.renderer)
 
                             app.renderer.renderPresent()
                             done = events(pressed)
@@ -281,11 +284,9 @@ proc update_screen(newManager: bool) =
 
             fpsMgr.manage()
     elif init(app) and done:
-        free(fpsMgr)
         exit(app)
         quit("Terminated early by user input", 0)
     else:
-        free(fpsMgr)
         exit(app)
         quit("SDL could not init", -1)
 
@@ -296,9 +297,7 @@ proc finished*() =
         while not done:
             update_screen(false)
 
-        free(fpsMgr)
         exit(app)
     else:
-        free(fpsMgr)
         exit(app)
         quit("SDL could not init", -1)

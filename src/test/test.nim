@@ -47,10 +47,10 @@ proc layer_cake(turtle: Turtle) =
 
 let bob = newTurtle()
 bob.pd()
-bob.setspeed(100)
+bob.setspeed(50)
 
 let larry = newTurtle()
-larry.setspeed(100)
+larry.setspeed(50)
 larry.pd()
 
 bob.lt(90)
@@ -60,8 +60,8 @@ bob.fd(20)
 bob.lt(90)
 bob.fd(20)
 
-let dist = parseFloat(readLineFromStdin "Input a distance: ")
-larry.fd(dist)
+#let dist = parseFloat(readLineFromStdin "Input a distance: ")
+#larry.fd(dist)
 
 bob.lt(90)
 bob.fd(20)
@@ -77,5 +77,13 @@ bob.lt(30)
 bob.fd(10)
 
 bob.lt(90)
+
+turtle.set_skip_animation(true)
+for _ in 0..360:
+    bob.lt(1)
+    bob.fd(1)
+
+turtle.set_skip_animation(false)
+bob.fd(20)
 
 turtle.finished()
