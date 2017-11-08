@@ -45,7 +45,7 @@ proc layer_cake(turtle: Turtle) =
     turtle.rt(180)
 
 let bob = newTurtle()
-bob.setspeed(200)
+bob.setspeed(100)
 
 bob.pd()
 
