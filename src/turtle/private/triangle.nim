@@ -12,8 +12,8 @@ type
 proc newTriangle*(vert1, vert2, vert3: Coordinate): Triangle =
     Triangle(vert1: vert1, vert2: vert2, vert3: vert3)
 
-proc rot_point(affected: var Coordinate, triangle_point: var Coordinate, angle: float) =
-    
+method rot_point(affected: var Coordinate, triangle_point: var Coordinate, angle: float) {.base.} =
+
         let pi = arccos(float32(-1))
         let rot_angle = angle / 180.0 * pi
     
@@ -29,11 +29,11 @@ proc rot_point(affected: var Coordinate, triangle_point: var Coordinate, angle: 
         affected.x = xnew + float(triangle_point.x)
         affected.y = ynew + float(triangle_point.y)
 
-proc rotate*(triangle: Triangle, angle: float) =
+method rotate*(triangle: Triangle, angle: float) {.base.} =
     triangle.vert2.rot_point(triangle.vert1, angle)
     triangle.vert3.rot_point(triangle.vert1, angle)
 
-proc drawTriangle*(triangle: Triangle, g: Graph, renderer: sdl.Renderer) =
+method drawTriangle*(triangle: Triangle, g: Graph, renderer: sdl.Renderer) {.base.} =
     let vert1 = g.c2p(triangle.vert1)
     let vert2 = g.c2p(triangle.vert2)
     let vert3 = g.c2p(triangle.vert3)

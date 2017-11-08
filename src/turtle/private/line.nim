@@ -12,7 +12,7 @@ proc newLine*(lineStart, lineEnd: graph.Coordinate): Line =
 proc newLine*(lineStart, lineEnd: tuple[x: float, y: float]): Line =
     newLine(newCoordinate(lineStart.x, lineStart.y), newCoordinate(lineEnd.x, lineEnd.y))
 
-proc draw*(line: Line, g: graph.Graph, renderer: sdl.Renderer) =
+method draw*(line: Line, g: graph.Graph, renderer: sdl.Renderer) {.base.} =
     let lineStart = g.c2p(line.lineStart)
     let lineEnd = g.c2p(line.lineEnd)
     discard sdl.renderDrawLine(renderer, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y)

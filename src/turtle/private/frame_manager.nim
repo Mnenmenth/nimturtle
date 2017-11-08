@@ -15,18 +15,18 @@ proc fpsTimer*(interval: uint32, param: pointer): uint32 {.cdecl.} =
 proc newFpsManager*(maxfps: int): FPSManager =
     FPSManager(counter: 0, fps: 0, maxfps: maxfps, timer: 0, delta: 0.0, ticks: sdl.getPerformanceCounter(), freq: sdl.getPerformanceFrequency())
 
-proc free*(manager: FPSManager) =
+method free*(manager: FPSManager) {.base.} =
     discard sdl.removeTimer(manager.timer)
     manager.timer = 0
 
-proc fps*(manager: FPSManager): int {.inline.} = return manager.fps
+method fps*(manager: FPSManager): int {.base.}  = return manager.fps
 
-proc start*(manager: FPSManager) =
+method start*(manager: FPSManager) {.base.} =
     manager.timer = sdl.addTimer(1000, fpsTimer, cast[pointer](manager))
 
-proc count*(manager: FPSManager) {.inline.} = inc(manager.counter)
+method count*(manager: FPSManager) {.base.}  = inc(manager.counter)
 
-proc manage*(manager: FPSManager) =
+method manage*(manager: FPSManager) {.base.} =
     manager.count()
     let spare = uint32(1000 / manager.maxfps) -
         1000'u32 * uint32((sdl.getPerformanceCounter() - manager.ticks).float / manager.freq.float)

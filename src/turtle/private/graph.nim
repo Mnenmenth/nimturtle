@@ -10,7 +10,7 @@ proc newCoordinate*(x, y: float): Coordinate =
 proc newCoordinate*(t: tuple[x: float, y: float]): Coordinate =
     newCoordinate(t.x, t.y)
 
-proc astuple*(c: Coordinate): tuple[x: float, y: float] =
+method astuple*(c: Coordinate): tuple[x: float, y: float] {.base.} =
     (c.x, c.y)
 
 type
@@ -24,7 +24,7 @@ proc newPoint*(x, y: int): Point =
 proc newPoint*(t: tuple[x: int, y: int]): Point =
     newPoint(t.x, t.y)
 
-proc astuple*(p: Point): tuple[x: int, y: int] =
+method astuple*(p: Point): tuple[x: int, y: int] {.base.} =
     (p.x, p.y)
 
 type
@@ -38,7 +38,7 @@ proc newDimension*(width, height: int): Dimension =
 proc newDimension*(t: tuple[width: int, height: int]): Dimension =
     newDimension(t.width, t.height)
 
-proc astuple*(d: Dimension): tuple[width: int, height: int] =
+method astuple*(d: Dimension): tuple[width: int, height: int] {.base.} =
     (d.width, d.height)
 
 type
@@ -52,32 +52,32 @@ type
 proc newGraph*(parentDim: Dimension, xmax, xmin, ymax, ymin: int): Graph =
     Graph(parentDim: parentDim, xmax: xmax, xmin: xmin, ymax: ymax, ymin: ymin)
 
-proc xunits(graph: Graph): float =
+method xunits(graph: Graph): float {.base.} =
     float((if graph.xmax < 0: -graph.xmax else: graph.xmax) + (if graph.xmin < 0: -graph.xmin else: graph.xmin))
 
-proc xtick(graph: Graph): float =
+method xtick(graph: Graph): float {.base.} =
     float(graph.parentDim.width)/graph.xunits()
 
-proc yunits(graph: Graph): float =
+method yunits(graph: Graph): float {.base.} =
     float((if graph.ymax < 0: -graph.ymax else: graph.ymax) + (if graph.ymin < 0: -graph.ymin else: graph.ymin))
 
-proc ytick(graph: Graph): float =
+method ytick(graph: Graph): float {.base.} =
     float(graph.parentDim.height)/graph.yunits()
 
-proc coordinateToPixelPoint*(g: Graph, c: Coordinate): Point =
+method coordinateToPixelPoint*(g: Graph, c: Coordinate): Point {.base.} =
     Point(
         x: int(round(c.x + float(if g.xmin < 0: -g.xmin else: g.xmin)) * g.xtick()), 
         y: int(round(-c.y + float(if g.ymin < 0: -g.ymin else: g.ymin)) * g.ytick())
         )
 
-proc c2p*(g: Graph, c: Coordinate): Point = 
+method c2p*(g: Graph, c: Coordinate): Point {.base.} = 
     g.coordinateToPixelPoint(c)
 
-proc pixelPointToCoordinate*(g: Graph, p: Point): Coordinate =
+method pixelPointToCoordinate*(g: Graph, p: Point): Coordinate {.base.} =
     Coordinate(
         x: float(p.x) / g.xtick() - float(if g.xmin < 0: -g.xmin else: g.xmin),
         y: float(p.y) / g.ytick() - float(if g.ymin < 0: -g.ymin else: g.ymin)
     )
 
-proc p2c*(g: Graph, p: Point): Coordinate =
+method p2c*(g: Graph, p: Point): Coordinate {.base.} =
     g.pixelPointToCoordinate(p)

@@ -38,11 +38,10 @@ var
     sdl_init: bool = false
 
 const FPS: int = 100
-let 
-    fpsMgr = newFpsManager(FPS)
-    g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
+var fpsMgr = newFpsManager(FPS)
+let g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
     
-proc update_screen()
+proc update_screen(newManager: bool)
 
 proc newTurtle*(): Turtle =
     result = Turtle(
@@ -56,10 +55,10 @@ proc newTurtle*(): Turtle =
     )
     turtles.add(result)
 
-proc update_rot(turtle: Turtle) =
+method update_rot(turtle: Turtle) {.base.} =
     turtle.shape.rotate(turtle.heading)
 
-proc setpos(turtle: Turtle, x, y: float) =
+method setpos(turtle: Turtle, x, y: float) {.base.} =
     turtle.pos = newCoordinate(x, y)
     
     turtle.shape.vert1.x = x
@@ -73,10 +72,10 @@ proc setpos(turtle: Turtle, x, y: float) =
     
     turtle.update_rot()
 
-proc setpos(turtle: Turtle, pos: tuple[x, y: float]) =
+method setpos(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
     turtle.setpos(pos.x, pos.y)
 
-proc goto*(turtle: Turtle, x, y: float) =
+method goto*(turtle: Turtle, x, y: float) {.base.} =
 
     let oldx = turtle.pos.x
     let oldy = turtle.pos.y
@@ -86,13 +85,13 @@ proc goto*(turtle: Turtle, x, y: float) =
 
     turtle.setpos(x, y)
 
-proc goto*(turtle: Turtle, pos: tuple[x, y: float]) =
+method goto*(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
     turtle.goto(pos.x, pos.y)
 
-proc getpos*(turtle: Turtle): tuple[x: float, y: float] =
+method getpos*(turtle: Turtle): tuple[x: float, y: float] {.base.} =
     turtle.pos.astuple()
 
-proc setheading*(turtle: Turtle, value: float) =
+method setheading*(turtle: Turtle, value: float) {.base.} =
     turtle.heading = value
     if turtle.heading < 0:
         while turtle.heading < 0:
@@ -101,24 +100,24 @@ proc setheading*(turtle: Turtle, value: float) =
         while turtle.heading > 360:
             turtle.heading -= 360
 
-proc getheading*(turtle: Turtle): float =
+method getheading*(turtle: Turtle): float {.base.} =
     turtle.heading
 
-proc getcolor*(turtle: Turtle): tuple[r: int, g: int, b: int] =
+method getcolor*(turtle: Turtle): tuple[r: int, g: int, b: int] {.base.} =
     turtle.color
 
-proc setcolor*(turtle: Turtle, r: int, g: int, b: int) =
+method setcolor*(turtle: Turtle, r: int, g: int, b: int) {.base.} =
     turtle.color.r = r
     turtle.color.g = g
     turtle.color.b = b
 
-proc getspeed*(turtle: Turtle): int =
+method getspeed*(turtle: Turtle): int {.base.} =
     turtle.speed
 
-proc setspeed*(turtle: Turtle, speed: int) =
+method setspeed*(turtle: Turtle, speed: int) {.base.} =
     turtle.speed = speed
 
-proc fd*(turtle: Turtle, dist: float) =
+method fd*(turtle: Turtle, dist: float) {.base.} = 
     let x = turtle.shape.vert1.x.float + dist * cos(turtle.heading * (PI/180))
     let y = turtle.shape.vert1.y.float + dist * sin(turtle.heading * (PI/180))
 
@@ -129,28 +128,28 @@ proc fd*(turtle: Turtle, dist: float) =
     let roundy = round(y * roundnum) / roundnum
 
     turtle.goto(roundx, roundy)
-    update_screen()
+    update_screen(newManager=true)
 
-proc lt*(turtle: Turtle, angle: float) =
+method lt*(turtle: Turtle, angle: float) {.base.} =
     turtle.setheading(turtle.heading+angle)
     turtle.update_rot()
-    update_screen()    
+    update_screen(newManager=true)
 
-proc rt*(turtle: Turtle, angle: float) =
+method rt*(turtle: Turtle, angle: float) {.base.} =
     turtle.setheading(turtle.heading-angle)
     turtle.update_rot()
-    update_screen()    
+    update_screen(newManager=true)
 
-proc pu*(turtle: Turtle) =
+method pu*(turtle: Turtle) {.base.} =
     turtle.penstatus = false
 
-proc pd*(turtle: Turtle) = 
+method pd*(turtle: Turtle) {.base.} = 
     turtle.penstatus = true
 
-proc draw*(turtle: Turtle, renderer: sdl.Renderer) =
+method draw*(turtle: Turtle, renderer: sdl.Renderer) {.base.} =
     turtle.shape.drawTriangle(g, renderer)
 
-proc init(app: App): bool =
+method init(app: App): bool {.base.} =
     if sdl_init == false:
         if sdl.init(sdl.InitVideo or sdl.InitTimer) != 0:
             echo "Error: Cannot init sdl: ", sdl.getError()
@@ -194,7 +193,7 @@ proc init(app: App): bool =
         sdl_init = true
     return true
 
-proc exit(app: App) = 
+method exit(app: App) {.base.} = 
     app.renderer.destroyRenderer()
     app.window.destroyWindow()
     sdl.quit()
@@ -215,8 +214,10 @@ proc events(pressed: var seq[sdl.Keycode]): bool =
             if e.key.keysym.sym == sdl.K_ESCAPE:
                 return true
 
-proc update_screen() =    
-    if init(app):
+proc update_screen(newManager: bool) =    
+    if init(app) and not done:
+        if newManager:
+            fpsMgr = newFpsManager(FPS)
 
         if app.renderer.renderClear() != 0:
             echo "Warning: Can't clear screen: ", sdl.getError()
@@ -224,59 +225,65 @@ proc update_screen() =
         discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
         discard app.renderer.renderClear()
         discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
-        for t in turtles:
-            for m in t.movements:
-                if not m.animated:
-                    let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
-                    let slopex = (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
-                    let slopey = (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
-                    let oldheading = t.heading
-                    t.heading = m.heading
-                    t.update_rot()
-                    echo "\nnew\n"
-                    echo "x: ", m.line.lineStart.x, " x: ", m.line.lineEnd.x
-                    echo "y: ", m.line.lineStart.y, " y: ", m.line.lineEnd.y
-                    while tempLine.lineEnd.x.ceil != m.line.lineEnd.x.ceil or tempLine.lineEnd.y.ceil != m.line.lineEnd.y.ceil:
-                        discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
-                        discard app.renderer.renderClear()
-                        discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+        block update:
+            for t in turtles:
+                for m in t.movements:
+                    if not m.animated:
+                        let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
+                        let slopex = (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
+                        let slopey = (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
+                        let oldheading = t.heading
+                        t.heading = m.heading
+                        t.update_rot()
+                        while tempLine.lineEnd.x.ceil != m.line.lineEnd.x.ceil or tempLine.lineEnd.y.ceil != m.line.lineEnd.y.ceil:
+                            discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
+                            discard app.renderer.renderClear()
+                            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
 
-                        t.setpos(tempLine.lineEnd.astuple)
-                        
-                        if m.visible:
-                            discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                            tempLine.draw(g, app.renderer)
+                            t.setpos(tempLine.lineEnd.astuple)
+                            
+                            if m.visible:
+                                discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                                tempLine.draw(g, app.renderer)
 
-                        discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
-                        t.draw(app.renderer)
-
-                        tempLine.lineEnd.x += slopex
-                        tempLine.lineEnd.y += slopey
-
-                        for t in turtles:
-                            for m in t.movements:
-                                if m.animated and m.visible:
-                                    discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                                    m.draw(g, app.renderer)
+                            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
                             t.draw(app.renderer)
 
-                        app.renderer.renderPresent()
-                        done = events(pressed)
+                            tempLine.lineEnd.x += slopex
+                            tempLine.lineEnd.y += slopey
 
-                        fpsMgr.manage()
+                            for t in turtles:
+                                for m in t.movements:
+                                    if m.animated and m.visible:
+                                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                                        m.draw(g, app.renderer)
+                                        done = events(pressed)
+                                        if done: break update
+                                t.draw(app.renderer)
 
-                    t.heading = oldheading
-                    t.setpos((m.line.lineEnd.x, m.line.lineEnd.y))
-                    m.animated = true
-                elif m.visible:
-                    discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                    m.draw(g, app.renderer)
-            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
-            t.draw(app.renderer)
-        app.renderer.renderPresent()
-        done = events(pressed)
+                            app.renderer.renderPresent()
+                            done = events(pressed)
+                            if done: break update
 
-        fpsMgr.manage()
+                            fpsMgr.manage()
+
+                        t.heading = oldheading
+                        t.setpos((m.line.lineEnd.x, m.line.lineEnd.y))
+                        m.animated = true
+                    elif m.visible:
+                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                        m.draw(g, app.renderer)
+                discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+                t.draw(app.renderer)
+            app.renderer.renderPresent()
+            done = events(pressed)
+            if done: break update
+
+            fpsMgr.manage()
+    elif init(app) and done:
+        free(fpsMgr)
+        exit(app)
+        quit("Terminated early by user input", 0)
     else:
         free(fpsMgr)
         exit(app)
@@ -285,8 +292,9 @@ proc update_screen() =
 proc finished*() =
 
     if init(app):
+        update_screen(newManager=true)
         while not done:
-            update_screen()
+            update_screen(false)
 
         free(fpsMgr)
         exit(app)

@@ -1,4 +1,5 @@
 import ../turtle
+import rdstdin, strutils
 
 proc dsfc(turtle: Turtle, x: float) =
     turtle.pu()
@@ -59,7 +60,8 @@ bob.fd(20)
 bob.lt(90)
 bob.fd(20)
 
-larry.fd(50)
+let dist = parseFloat(readLineFromStdin "Input a distance: ")
+larry.fd(dist)
 
 bob.lt(90)
 bob.fd(20)
