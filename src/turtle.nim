@@ -17,8 +17,6 @@ const
     WindowFlags = 0
     RenderFlags = 0
 
-let g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
-
 type
     Turtle* = ref object of RootObj
         shape: Triangle
@@ -37,6 +35,14 @@ var
     done = false
     pressed: seq[sdl.Keycode] = @[]
     turtles: seq[Turtle] = @[]
+    sdl_init: bool = false
+
+const FPS: int = 100
+let 
+    fpsMgr = newFpsManager(FPS)
+    g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
+    
+proc update_screen()
 
 proc newTurtle*(): Turtle =
     result = Turtle(
@@ -123,14 +129,17 @@ proc fd*(turtle: Turtle, dist: float) =
     let roundy = round(y * roundnum) / roundnum
 
     turtle.goto(roundx, roundy)
+    update_screen()
 
 proc lt*(turtle: Turtle, angle: float) =
     turtle.setheading(turtle.heading+angle)
-    turtle.update_rot()    
+    turtle.update_rot()
+    update_screen()    
 
 proc rt*(turtle: Turtle, angle: float) =
     turtle.setheading(turtle.heading-angle)
-    turtle.update_rot()    
+    turtle.update_rot()
+    update_screen()    
 
 proc pu*(turtle: Turtle) =
     turtle.penstatus = false
@@ -142,45 +151,47 @@ proc draw*(turtle: Turtle, renderer: sdl.Renderer) =
     turtle.shape.drawTriangle(g, renderer)
 
 proc init(app: App): bool =
-    if sdl.init(sdl.InitVideo or sdl.InitTimer) != 0:
-        echo "Error: Cannot init sdl: ", sdl.getError()
-        return false
+    if sdl_init == false:
+        if sdl.init(sdl.InitVideo or sdl.InitTimer) != 0:
+            echo "Error: Cannot init sdl: ", sdl.getError()
+            return false
 
-    app.window = sdl.createWindow(
-        Title,
-        sdl.WindowPosCentered,
-        sdl.WindowPosCentered,
-        Width,
-        Height,
-        WindowFlags
-    )
-    if app.window == nil:
-        echo "Error: Cannot open window: ", sdl.getError()
-        return false
+        app.window = sdl.createWindow(
+            Title,
+            sdl.WindowPosCentered,
+            sdl.WindowPosCentered,
+            Width,
+            Height,
+            WindowFlags
+        )
+        if app.window == nil:
+            echo "Error: Cannot open window: ", sdl.getError()
+            return false
 
-    app.renderer = sdl.createRenderer(app.window, -1, RenderFlags)
-    if app.renderer == nil:
-        echo "Error: Cannot open window: ", sdl.getError()
-        return false
+        app.renderer = sdl.createRenderer(app.window, -1, RenderFlags)
+        if app.renderer == nil:
+            echo "Error: Cannot open window: ", sdl.getError()
+            return false
 
-    if app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF) != 0:
-        echo "Error: Cannot set draw color" , sdl.getError()
-        return false
+        if app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF) != 0:
+            echo "Error: Cannot set draw color" , sdl.getError()
+            return false
 
-    var mode: DisplayMode
-    
-    discard sdl.getDisplayMode(0, 0, addr(mode))
+        var mode: DisplayMode
+        
+        discard sdl.getDisplayMode(0, 0, addr(mode))
 
-    let scale = 5/8
+        let scale = 5/8
 
-    let w = int(round(mode.h.float * scale))
-    let h = int(round(mode.h.float * scale))
+        let w = int(round(mode.h.float * scale))
+        let h = int(round(mode.h.float * scale))
 
-    app.window.setWindowSize(w, h)
-    app.window.setWindowPosition(sdl.WindowPosCentered, sdl.WindowPosCentered)
-    g.parentDim = newDimension(w, h)
+        app.window.setWindowSize(w, h)
+        app.window.setWindowPosition(sdl.WindowPosCentered, sdl.WindowPosCentered)
+        g.parentDim = newDimension(w, h)
 
-    echo "SDL init successfully"
+        echo "SDL init successfully"
+        sdl_init = true
     return true
 
 proc exit(app: App) = 
@@ -204,72 +215,82 @@ proc events(pressed: var seq[sdl.Keycode]): bool =
             if e.key.keysym.sym == sdl.K_ESCAPE:
                 return true
 
-proc mainloop*() =
-
-    const FPS: int = 100
-    let fpsMgr = newFpsManager(FPS)
-
+proc update_screen() =    
     if init(app):
 
         if app.renderer.renderClear() != 0:
             echo "Warning: Can't clear screen: ", sdl.getError()
 
-        while not done:
-            discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
-            discard app.renderer.renderClear()
-            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
-            for t in turtles:
-                for m in t.movements:
-                    if not m.animated:
-                        let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
-                        let slopex = (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
-                        let slopey = (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
-                        let oldheading = t.heading
-                        t.heading = m.heading
-                        t.update_rot()
-                        echo "\nnew\n"
-                        echo "x: ", m.line.lineStart.x, " x: ", m.line.lineEnd.x
-                        echo "y: ", m.line.lineStart.y, " y: ", m.line.lineEnd.y
-                        while tempLine.lineEnd.x.ceil != m.line.lineEnd.x.ceil or tempLine.lineEnd.y.ceil != m.line.lineEnd.y.ceil:
-                            discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
-                            discard app.renderer.renderClear()
-                            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+        discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
+        discard app.renderer.renderClear()
+        discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+        for t in turtles:
+            for m in t.movements:
+                if not m.animated:
+                    let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
+                    let slopex = (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
+                    let slopey = (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
+                    let oldheading = t.heading
+                    t.heading = m.heading
+                    t.update_rot()
+                    echo "\nnew\n"
+                    echo "x: ", m.line.lineStart.x, " x: ", m.line.lineEnd.x
+                    echo "y: ", m.line.lineStart.y, " y: ", m.line.lineEnd.y
+                    while tempLine.lineEnd.x.ceil != m.line.lineEnd.x.ceil or tempLine.lineEnd.y.ceil != m.line.lineEnd.y.ceil:
+                        discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
+                        discard app.renderer.renderClear()
+                        discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
 
-                            t.setpos(tempLine.lineEnd.astuple)
-                            
-                            if m.visible:
-                                discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                                tempLine.draw(g, app.renderer)
+                        t.setpos(tempLine.lineEnd.astuple)
+                        
+                        if m.visible:
+                            discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                            tempLine.draw(g, app.renderer)
 
-                            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+                        discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+                        t.draw(app.renderer)
+
+                        tempLine.lineEnd.x += slopex
+                        tempLine.lineEnd.y += slopey
+
+                        for t in turtles:
+                            for m in t.movements:
+                                if m.animated and m.visible:
+                                    discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                                    m.draw(g, app.renderer)
                             t.draw(app.renderer)
 
-                            tempLine.lineEnd.x += slopex
-                            tempLine.lineEnd.y += slopey
+                        app.renderer.renderPresent()
+                        done = events(pressed)
 
-                            for t in turtles:
-                                for m in t.movements:
-                                    if m.animated and m.visible:
-                                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                                        m.draw(g, app.renderer)
+                        fpsMgr.manage()
 
-                            app.renderer.renderPresent()
-                            done = events(pressed)
+                    t.heading = oldheading
+                    t.setpos((m.line.lineEnd.x, m.line.lineEnd.y))
+                    m.animated = true
+                elif m.visible:
+                    discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                    m.draw(g, app.renderer)
+            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+            t.draw(app.renderer)
+        app.renderer.renderPresent()
+        done = events(pressed)
 
-                            fpsMgr.manage()
+        fpsMgr.manage()
+    else:
+        free(fpsMgr)
+        exit(app)
+        quit("SDL could not init", -1)
 
-                        t.heading = oldheading
-                        t.setpos((m.line.lineEnd.x, m.line.lineEnd.y))
-                        m.animated = true
-                    elif m.visible:
-                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
-                        m.draw(g, app.renderer)
-                discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
-                t.draw(app.renderer)
-            app.renderer.renderPresent()
-            done = events(pressed)
+proc finished*() =
 
-            fpsMgr.manage()
+    if init(app):
+        while not done:
+            update_screen()
 
-    free(fpsMgr)
-    exit(app)
+        free(fpsMgr)
+        exit(app)
+    else:
+        free(fpsMgr)
+        exit(app)
+        quit("SDL could not init", -1)

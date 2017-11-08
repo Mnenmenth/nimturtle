@@ -22,4 +22,4 @@ import distros
 foreignDep "sdl2"
 
 task test, "Run turtle test":
-    exec "nim c -r src/test/test.nim"
+    exec "nim c --d:debug --lineDir:on --debuginfo --run src/test/test.nim"

@@ -45,15 +45,21 @@ proc layer_cake(turtle: Turtle) =
     turtle.rt(180)
 
 let bob = newTurtle()
+bob.pd()
 bob.setspeed(100)
 
-bob.pd()
+let larry = newTurtle()
+larry.setspeed(100)
+larry.pd()
 
 bob.lt(90)
+larry.lt(60)
 bob.fd(20)
 
 bob.lt(90)
 bob.fd(20)
+
+larry.fd(50)
 
 bob.lt(90)
 bob.fd(20)
@@ -62,9 +68,12 @@ bob.lt(90)
 bob.fd(20)
 
 bob.lt(45)
+larry.fd(20)
 bob.fd(30)
 
 bob.lt(30)
 bob.fd(10)
 
-turtle.mainloop()
+bob.lt(90)
+
+turtle.finished()
