@@ -45,44 +45,26 @@ proc layer_cake(turtle: Turtle) =
     turtle.rt(180)
 
 let bob = newTurtle()
-#bob.layer_cake()
+bob.setspeed(200)
 
-bob.fd(20)
-bob.lt(90)
-bob.fd(20)
-
-let fred = newTurtle()
-fred.lt(45)
-fred.fd(28.2842712475)
-
-fred.pu()
-fred.fd(200)
-bob.pu()
-bob.fd(200)
-
-#[bob.pd()
-bob.setcolor(255, 0, 0)
-bob.fd(40)
+bob.pd()
 
 bob.lt(90)
-bob.setcolor(255, 255, 255)
 bob.fd(20)
 
 bob.lt(90)
-bob.setcolor(0, 255, 0)
-bob.fd(40)
-
-bob.lt(90)
-bob.setcolor(0, 0, 0)
-
-
-bob.rt(45)
 bob.fd(20)
 
 bob.lt(90)
-bob.fd(20)]#
+bob.fd(20)
 
-#bob.setcolor(124, 124, 124)
-#bob.setpos(-20, 40)
+bob.lt(90)
+bob.fd(20)
+
+bob.lt(45)
+bob.fd(30)
+
+bob.lt(30)
+bob.fd(10)
 
 turtle.mainloop()

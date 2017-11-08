@@ -5,7 +5,6 @@ type
     Line* = ref object of RootObj
         lineStart*: graph.Coordinate
         lineEnd*: graph.Coordinate
-        color*: tuple[r: int, g: int, b: int]
 
 proc newLine*(lineStart, lineEnd: graph.Coordinate): Line =
     Line(lineStart: lineStart, lineEnd: lineEnd)

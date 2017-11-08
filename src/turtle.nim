@@ -1,4 +1,5 @@
 import math
+import strutils
 import sdl2.sdl
 
 import turtle/private/graph
@@ -25,7 +26,8 @@ type
         heading: float
         penstatus: bool
         color: tuple[r: int, g: int, b: int]
-        movements: seq[Movement]     
+        movements: seq[Movement]
+        speed: int
     App = ref object of RootObj
         window*: sdl.Window
         renderer*: sdl.Renderer
@@ -43,21 +45,15 @@ proc newTurtle*(): Turtle =
         heading: 0.0,
         penstatus: true,
         color: (0, 0, 0),
-        movements: @[]
+        movements: @[],
+        speed: 1
     )
     turtles.add(result)
 
 proc update_rot(turtle: Turtle) =
     turtle.shape.rotate(turtle.heading)
 
-proc setpos*(turtle: Turtle, x, y: float) =
-
-    let oldx = turtle.pos.x
-    let oldy = turtle.pos.y
-
-    let movement = newMovement(newLine((oldx, oldy), (x ,y)), turtle.color, turtle.penstatus)
-    turtle.movements.add(movement)
-
+proc setpos(turtle: Turtle, x, y: float) =
     turtle.pos = newCoordinate(x, y)
     
     turtle.shape.vert1.x = x
@@ -70,6 +66,22 @@ proc setpos*(turtle: Turtle, x, y: float) =
     turtle.shape.vert3.y = y - TURTLE_SIZE.width.float
     
     turtle.update_rot()
+
+proc setpos(turtle: Turtle, pos: tuple[x, y: float]) =
+    turtle.setpos(pos.x, pos.y)
+
+proc goto*(turtle: Turtle, x, y: float) =
+
+    let oldx = turtle.pos.x
+    let oldy = turtle.pos.y
+
+    let movement = newMovement(newLine((oldx, oldy), (x, y)), turtle.heading, turtle.color, turtle.penstatus)
+    turtle.movements.add(movement)
+
+    turtle.setpos(x, y)
+
+proc goto*(turtle: Turtle, pos: tuple[x, y: float]) =
+    turtle.goto(pos.x, pos.y)
 
 proc getpos*(turtle: Turtle): tuple[x: float, y: float] =
     turtle.pos.astuple()
@@ -92,15 +104,25 @@ proc getcolor*(turtle: Turtle): tuple[r: int, g: int, b: int] =
 proc setcolor*(turtle: Turtle, r: int, g: int, b: int) =
     turtle.color.r = r
     turtle.color.g = g
+    turtle.color.b = b
 
-proc move_turtle(turtle: Turtle, dist: float) =
+proc getspeed*(turtle: Turtle): int =
+    turtle.speed
+
+proc setspeed*(turtle: Turtle, speed: int) =
+    turtle.speed = speed
+
+proc fd*(turtle: Turtle, dist: float) =
     let x = turtle.shape.vert1.x.float + dist * cos(turtle.heading * (PI/180))
     let y = turtle.shape.vert1.y.float + dist * sin(turtle.heading * (PI/180))
 
-    turtle.setpos(x, y)
+    let round_to: float = 4
+    let roundnum = 10 * round_to
 
-proc fd*(turtle: Turtle, dist: float) =
-    turtle.move_turtle(dist)
+    let roundx = round(x * roundnum) / roundnum
+    let roundy = round(y * roundnum) / roundnum
+
+    turtle.goto(roundx, roundy)
 
 proc lt*(turtle: Turtle, angle: float) =
     turtle.setheading(turtle.heading+angle)
@@ -185,13 +207,7 @@ proc events(pressed: var seq[sdl.Keycode]): bool =
 proc mainloop*() =
 
     const FPS: int = 100
-    var 
-        fpsMgr = newFpsManager()
-        delta = 0.0
-        ticks: uint64
-        freq = sdl.getPerformanceFrequency()
-
-    ticks = sdl.getPerformanceCounter()
+    let fpsMgr = newFpsManager(FPS)
 
     if init(app):
 
@@ -201,28 +217,59 @@ proc mainloop*() =
         while not done:
             discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
             discard app.renderer.renderClear()
-
             discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
-
             for t in turtles:
                 for m in t.movements:
-                    if m.visible:
-                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)                                        
-                        m.draw(g, app.renderer)
-                discard app.renderer.setRenderDrawColor(0, 0, 0, 0)                    
-                t.draw(app.renderer)
+                    if not m.animated:
+                        let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
+                        let slopex = (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
+                        let slopey = (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
+                        let oldheading = t.heading
+                        t.heading = m.heading
+                        t.update_rot()
+                        echo "\nnew\n"
+                        echo "x: ", m.line.lineStart.x, " x: ", m.line.lineEnd.x
+                        echo "y: ", m.line.lineStart.y, " y: ", m.line.lineEnd.y
+                        while tempLine.lineEnd.x.ceil != m.line.lineEnd.x.ceil or tempLine.lineEnd.y.ceil != m.line.lineEnd.y.ceil:
+                            discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
+                            discard app.renderer.renderClear()
+                            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
 
+                            t.setpos(tempLine.lineEnd.astuple)
+                            
+                            if m.visible:
+                                discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                                tempLine.draw(g, app.renderer)
+
+                            discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+                            t.draw(app.renderer)
+
+                            tempLine.lineEnd.x += slopex
+                            tempLine.lineEnd.y += slopey
+
+                            for t in turtles:
+                                for m in t.movements:
+                                    if m.animated and m.visible:
+                                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                                        m.draw(g, app.renderer)
+
+                            app.renderer.renderPresent()
+                            done = events(pressed)
+
+                            fpsMgr.manage()
+
+                        t.heading = oldheading
+                        t.setpos((m.line.lineEnd.x, m.line.lineEnd.y))
+                        m.animated = true
+                    elif m.visible:
+                        discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
+                        m.draw(g, app.renderer)
+                discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
+                t.draw(app.renderer)
             app.renderer.renderPresent()
             done = events(pressed)
 
-            fpsMgr.count()
-            let spare = uint32(1000 / FPS) -
-                1000'u32 * uint32((sdl.getPerformanceCounter() - ticks).float / freq.float)
-            if spare > 0'u32:
-                sdl.delay(spare)
-            
-            delta = (sdl.getPerformanceCounter() - ticks).float / freq.float
-            ticks = sdl.getPerformanceCounter()
+            fpsMgr.manage()
 
-    #free(fpsMgr)            
+    free(fpsMgr)
     exit(app)
