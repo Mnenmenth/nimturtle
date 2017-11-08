@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.2"
+version       = "0.2.1"
 author        = "Earl Kennedy"
 description   = "Turtle Graphics using SDL"
 license       = "MIT"
