@@ -1,3 +1,11 @@
+#[
+    Turtle Graphics implementation in Nim using SDL2
+
+    Made by Earl Kennedy
+    https://github.com/Mnenmenth
+    https://mnenmenth.com
+]#
+
 import math
 import strutils
 import sdl2.sdl

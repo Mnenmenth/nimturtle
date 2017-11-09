@@ -1,3 +1,11 @@
+#[
+    Converts units to pixel points and vice versa
+
+    Made by Earl Kennedy
+    https://github.com/Mnenmenth
+    https://mnenmenth.com
+]#
+
 from math import round
 type
     Coordinate* = ref object of RootObj

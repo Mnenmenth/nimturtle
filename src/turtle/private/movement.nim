@@ -1,3 +1,11 @@
+#[
+    Movement made by turtle
+
+    Made by Earl Kennedy
+    https://github.com/Mnenmenth
+    https://mnenmenth.com
+]#
+
 import graph
 import line
 import sdl2.sdl
