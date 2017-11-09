@@ -233,12 +233,16 @@ proc update_screen(newManager: bool) =
                 for m in t.movements:
                     if not m.animated:
                         let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
-                        let slopex = (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
-                        let slopey = (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
+                        let slopex = if m.line.lineEnd.x == m.line.lineStart.x: 0.0 else: (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
+                        let slopey = if m.line.lineEnd.y == m.line.lineStart.y: 0.0 else: (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
                         let oldheading = t.heading
                         t.heading = m.heading
                         t.update_rot()
-                        while tempLine.lineEnd.x.ceil != m.line.lineEnd.x.ceil or tempLine.lineEnd.y.ceil != m.line.lineEnd.y.ceil:
+                        let mx = m.line.lineEnd.x
+                        let my = m.line.lineEnd.y
+                        echo slopex, " ", slopey
+                        while (if slopex < 0: tempLine.lineEnd.x >= mx else: tempLine.lineEnd.x <= mx) and
+                              (if slopey < 0: tempLine.lineEnd.y >= my else: tempLine.lineEnd.y <= my):
                             discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)
                             discard app.renderer.renderClear()
                             discard app.renderer.setRenderDrawColor(0, 0, 0, 0)

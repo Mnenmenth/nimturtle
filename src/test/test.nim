@@ -50,7 +50,7 @@ bob.pd()
 bob.setspeed(50)
 
 let larry = newTurtle()
-larry.setspeed(50)
+larry.setspeed(100)
 larry.pd()
 
 bob.lt(90)
@@ -85,5 +85,10 @@ for _ in 0..360:
 
 turtle.set_skip_animation(false)
 bob.fd(20)
+
+let h = if 3 == 3: true else: false
+
+larry.setspeed(5)
+larry.layer_cake()
 
 turtle.finished()
