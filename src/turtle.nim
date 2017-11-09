@@ -43,16 +43,16 @@ var
     done = false
     pressed: seq[sdl.Keycode] = @[]
     turtles: seq[Turtle] = @[]
-    sdl_init: bool = false
-    skip_animation: bool = false
+    sdlInit: bool = false
+    skipAnimation: bool = false
 
-proc set_skip_animation*(skip: bool) = skip_animation = skip
+proc setSkipAnimation*(skip: bool) = skipAnimation = skip
 
 const FPS: int = 60
 var fpsMgr = newFpsManager(FPS)
 let g: Graph = newGraph(newDimension(Width, Height), 100, 100, 100, 100)
     
-proc update_screen(newManager: bool)
+proc updateScreen(newManager: bool)
 
 proc newTurtle*(): Turtle =
     result = Turtle(
@@ -66,10 +66,10 @@ proc newTurtle*(): Turtle =
     )
     turtles.add(result)
 
-method update_rot(turtle: Turtle) {.base.} =
+method updateRot(turtle: Turtle) {.base.} =
     turtle.shape.rotate(turtle.heading)
 
-method setpos(turtle: Turtle, x, y: float) {.base.} =
+method setPos(turtle: Turtle, x, y: float) {.base.} =
     turtle.pos = newCoordinate(x, y)
     
     turtle.shape.vert1.x = x
@@ -81,28 +81,28 @@ method setpos(turtle: Turtle, x, y: float) {.base.} =
     turtle.shape.vert3.x = x - TURTLE_SIZE.height.float
     turtle.shape.vert3.y = y - TURTLE_SIZE.width.float
     
-    turtle.update_rot()
+    turtle.updateRot()
 
-method setpos(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
-    turtle.setpos(pos.x, pos.y)
+method setPos(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
+    turtle.setPos(pos.x, pos.y)
 
 method goto*(turtle: Turtle, x, y: float) {.base.} =
 
     let oldx = turtle.pos.x
     let oldy = turtle.pos.y
 
-    let movement = newMovement(newLine((oldx, oldy), (x, y)), turtle.heading, turtle.color, turtle.penstatus, skip_animation)
+    let movement = newMovement(newLine((oldx, oldy), (x, y)), turtle.heading, turtle.color, turtle.penstatus, skipAnimation)
     turtle.movements.add(movement)
 
-    turtle.setpos(x, y)
+    turtle.setPos(x, y)
 
 method goto*(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
     turtle.goto(pos.x, pos.y)
 
-method getpos*(turtle: Turtle): tuple[x: float, y: float] {.base.} =
+method getPos*(turtle: Turtle): tuple[x: float, y: float] {.base.} =
     turtle.pos.astuple()
 
-method setheading*(turtle: Turtle, value: float) {.base.} =
+method setHeading*(turtle: Turtle, value: float) {.base.} =
     turtle.heading = value
     if turtle.heading < 0:
         while turtle.heading < 0:
@@ -111,21 +111,21 @@ method setheading*(turtle: Turtle, value: float) {.base.} =
         while turtle.heading > 360:
             turtle.heading -= 360
 
-method getheading*(turtle: Turtle): float {.base.} =
+method getHeading*(turtle: Turtle): float {.base.} =
     turtle.heading
 
-method getcolor*(turtle: Turtle): tuple[r: int, g: int, b: int] {.base.} =
+method getColor*(turtle: Turtle): tuple[r: int, g: int, b: int] {.base.} =
     turtle.color
 
-method setcolor*(turtle: Turtle, r: int, g: int, b: int) {.base.} =
+method setColor*(turtle: Turtle, r: int, g: int, b: int) {.base.} =
     turtle.color.r = r
     turtle.color.g = g
     turtle.color.b = b
 
-method getspeed*(turtle: Turtle): int {.base.} =
+method getSpeed*(turtle: Turtle): int {.base.} =
     turtle.speed
 
-method setspeed*(turtle: Turtle, speed: int) {.base.} =
+method setSpeed*(turtle: Turtle, speed: int) {.base.} =
     turtle.speed = speed
 
 method fd*(turtle: Turtle, dist: float) {.base.} = 
@@ -139,29 +139,44 @@ method fd*(turtle: Turtle, dist: float) {.base.} =
     let roundy = round(y * roundnum) / roundnum
 
     turtle.goto(roundx, roundy)
-    if not skip_animation: update_screen(newManager=true)
+    if not skipAnimation: updateScreen(newManager=true)
+
+method forward*(turtle: Turtle, dist: float) {.base.} = 
+    turtle.fd(dist)
 
 method lt*(turtle: Turtle, angle: float) {.base.} =
-    turtle.setheading(turtle.heading+angle)
-    turtle.update_rot()
-    if not skip_animation: update_screen(newManager=true)
+    turtle.setHeading(turtle.heading+angle)
+    turtle.updateRot()
+    if not skipAnimation: updateScreen(newManager=true)
+
+method leftTurn*(turtle: Turtle, angle: float) {.base.} =
+    turtle.lt(angle)
 
 method rt*(turtle: Turtle, angle: float) {.base.} =
-    turtle.setheading(turtle.heading-angle)
-    turtle.update_rot()
-    if not skip_animation: update_screen(newManager=true)
+    turtle.setHeading(turtle.heading-angle)
+    turtle.updateRot()
+    if not skipAnimation: updateScreen(newManager=true)
+
+method rightTurn*(turtle: Turtle, angle: float) {.base.} =
+    turtle.rt(angle)
 
 method pu*(turtle: Turtle) {.base.} =
     turtle.penstatus = false
 
+method penUp*(turtle: Turtle) {.base.} =
+    turtle.pu()
+
 method pd*(turtle: Turtle) {.base.} = 
     turtle.penstatus = true
 
-method draw*(turtle: Turtle, renderer: sdl.Renderer) {.base.} =
+method penDown*(turtle: Turtle) {.base.} =
+    turtle.pd()
+
+method draw(turtle: Turtle, renderer: sdl.Renderer) {.base.} =
     turtle.shape.drawTriangle(g, renderer)
 
 method init(app: App): bool {.base.} =
-    if sdl_init == false:
+    if sdlInit == false:
         if sdl.init(sdl.InitVideo or sdl.InitTimer) != 0:
             echo "Error: Cannot init sdl: ", sdl.getError()
             return false
@@ -201,7 +216,7 @@ method init(app: App): bool {.base.} =
         g.parentDim = newDimension(w, h)
 
         echo "SDL init successfully"
-        sdl_init = true
+        sdlInit = true
     return true
 
 method exit(app: App) {.base.} = 
@@ -225,7 +240,7 @@ proc events(pressed: var seq[sdl.Keycode]): bool =
             if e.key.keysym.sym == sdl.K_ESCAPE:
                 return true
 
-proc update_screen(newManager: bool) =    
+proc updateScreen(newManager: bool) =    
     if init(app) and not done:
         if newManager:
             fpsMgr = newFpsManager(FPS)
@@ -241,11 +256,11 @@ proc update_screen(newManager: bool) =
                 for m in t.movements:
                     if not m.animated:
                         let tempLine = newLine((m.line.lineStart.x, m.line.lineStart.y), (m.line.lineStart.x, m.line.lineStart.y))
-                        let slopex = if m.line.lineEnd.x == m.line.lineStart.x: 0.0 else: (m.line.lineEnd.x - m.line.lineStart.x)/t.getspeed.float
-                        let slopey = if m.line.lineEnd.y == m.line.lineStart.y: 0.0 else: (m.line.lineEnd.y - m.line.lineStart.y)/t.getspeed.float
-                        let oldheading = t.heading
+                        let slopex = if m.line.lineEnd.x == m.line.lineStart.x: 0.0 else: (m.line.lineEnd.x - m.line.lineStart.x)/t.getSpeed.float
+                        let slopey = if m.line.lineEnd.y == m.line.lineStart.y: 0.0 else: (m.line.lineEnd.y - m.line.lineStart.y)/t.getSpeed.float
+                        let oldHeading = t.heading
                         t.heading = m.heading
-                        t.update_rot()
+                        t.updateRot()
                         let mx = m.line.lineEnd.x
                         let my = m.line.lineEnd.y
                         while (if slopex < 0: tempLine.lineEnd.x >= mx else: tempLine.lineEnd.x <= mx) and
@@ -254,7 +269,7 @@ proc update_screen(newManager: bool) =
                             discard app.renderer.renderClear()
                             discard app.renderer.setRenderDrawColor(0, 0, 0, 0)
 
-                            t.setpos(tempLine.lineEnd.astuple)
+                            t.setPos(tempLine.lineEnd.astuple)
                             
                             if m.visible:
                                 discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
@@ -281,8 +296,8 @@ proc update_screen(newManager: bool) =
 
                             fpsMgr.manage()
 
-                        t.heading = oldheading
-                        t.setpos((m.line.lineEnd.x, m.line.lineEnd.y))
+                        t.heading = oldHeading
+                        t.setPos((m.line.lineEnd.x, m.line.lineEnd.y))
                         m.animated = true
                     elif m.visible:
                         discard app.renderer.setRenderDrawColor(uint8(m.color.r), uint8(m.color.g), uint8(m.color.b), 0)
@@ -304,9 +319,9 @@ proc update_screen(newManager: bool) =
 proc finished*() =
 
     if init(app):
-        update_screen(newManager=true)
+        updateScreen(newManager=true)
         while not done:
-            update_screen(false)
+            updateScreen(false)
 
         exit(app)
     else:
