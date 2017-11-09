@@ -87,7 +87,8 @@ bob.fd(10)
 bob.lt(90)
 
 turtle.set_skip_animation(true)
-for _ in 0..360:
+for i in 0..360:
+    if i == 355: turtle.set_skip_animation(false)
     bob.lt(1)
     bob.fd(1)
 

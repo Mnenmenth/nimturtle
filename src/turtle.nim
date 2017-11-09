@@ -248,7 +248,6 @@ proc update_screen(newManager: bool) =
                         t.update_rot()
                         let mx = m.line.lineEnd.x
                         let my = m.line.lineEnd.y
-                        echo slopex, " ", slopey
                         while (if slopex < 0: tempLine.lineEnd.x >= mx else: tempLine.lineEnd.x <= mx) and
                               (if slopey < 0: tempLine.lineEnd.y >= my else: tempLine.lineEnd.y <= my):
                             discard app.renderer.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF)

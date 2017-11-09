@@ -6,8 +6,6 @@ description   = "Turtle Graphics using SDL"
 license       = "MIT"
 
 srcDir        = "src"
-#binDir        = "bin"
-#bin           = @["turtle"]
 backend       = "c"
 
 skipDirs      = @["test"]
