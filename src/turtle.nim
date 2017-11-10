@@ -168,7 +168,7 @@ method getHeading*(turtle: Turtle): float {.base.} =
     turtle.heading
 
 method getColor*(turtle: Turtle): tuple[r: int, g: int, b: int] {.base.} =
-    ## Returns current color of tje turtle
+    ## Returns current color of the turtle
     turtle.color
 
 method setColor*(turtle: Turtle, r: int, g: int, b: int) {.base.} =
