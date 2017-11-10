@@ -1,10 +1,8 @@
-#[
-    Test file for nimturtle
-
-    Made by Earl Kennedy
-    https://github.com/Mnenmenth
-    https://mnenmenth.com
-]#
+##    Turtle Graphics implementation in Nim using SDL2
+#                                                      
+#    Made by Earl Kennedy                               
+#    https://github.com/Mnenmenth                        
+#    https://mnenmenth.com
 
 import ../turtle
 import rdstdin, strutils

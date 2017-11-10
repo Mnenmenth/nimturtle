@@ -24,4 +24,4 @@ task test, "Run turtle test - debug":
 task testd, "Run turtle test - debug":
     exec "nim c --d:debug --lineDir:on --debuginfo --run src/test/test.nim"
 task testr, "Run turtle test - release":
-    exec "nim c --d:release --opt:size --run src/test/test.nim"
+    exec "nim c --d:release --opt:size --deadCodeElim:on --run src/test/test.nim"

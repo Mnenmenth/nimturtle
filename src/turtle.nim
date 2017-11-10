@@ -1,9 +1,8 @@
-
-##    Turtle Graphics implementation in Nim using SDL2 \
-##                                                      \
-##    Made by Earl Kennedy                               \
-##    https://github.com/Mnenmenth                        \
-##    https://mnenmenth.com
+## Turtle Graphics implementation in Nim using SDL2
+#                                                      
+#  Made by Earl Kennedy                               
+#  https://github.com/Mnenmenth                        
+#  https://mnenmenth.com
 
 import math
 import strutils
@@ -18,26 +17,26 @@ import turtle/private/line
 type
     Turtle* = ref object of RootObj
         ## Turtle type
-        shape: Triangle ## \
-            ## `shape` is the triangle that is graphically drawn to represent the turtle on the screen
-        pos: graph.Coordinate ## \
-            ## `pos` stores the position of the top vertice of the turtle shape
-        heading: float ## \
-            ## `heading` stores the angular direction of the turtle (0-360 degrees)
-        penStatus: bool ## \
-            ## `penStatus` stores the current state of the pen (up or down)
-        color: tuple[r: int, g: int, b: int] ## \
-            ## `color` stores the rgb values of the current color of the turtle
-        movements: seq[Movement] ## \
-            ## `movements` stores all of the movements made by the turtle
-        speed: int ## \
-            ## `speed` stores the current speed of the turtle (lower value = faster)
+        shape: Triangle
+            # shape is the triangle that is graphically drawn to represent the turtle on the screen
+        pos: graph.Coordinate
+            # pos stores the position of the top vertice of the turtle shape
+        heading: float 
+            # heading stores the angular direction of the turtle (0-360 degrees)
+        penStatus: bool 
+            # penStatus stores the current state of the pen (up or down)
+        color: tuple[r: int, g: int, b: int] 
+            # color stores the rgb values of the current color of the turtle
+        movements: seq[Movement] 
+            # movements stores all of the movements made by the turtle
+        speed: int 
+            # speed stores the current speed of the turtle (lower value = faster)
     App = ref object of RootObj
-        ## Contains window and renderer for turtle graphics
-        window*: sdl.Window ## \
-            ## `window` stores the window for drawing graphics
-        renderer*: sdl.Renderer ## \
-            ## `renderer` stores the renderer for drawing graphics
+        # Contains window and renderer for turtle graphics
+        window*: sdl.Window 
+            # window stores the window for drawing graphics
+        renderer*: sdl.Renderer 
+            # renderer stores the renderer for drawing graphics
 
 const
     # Constants for sdl window
@@ -70,7 +69,8 @@ var
 
 
 proc setSkipAnimation*(skip: bool) =
-    ## Set skipAnimation variable
+    ## Set if animation for movement(s) should be skipped. 
+    ## Only affects movements after set to false, and none after set back to true
     skipAnimation = skip
 
     
@@ -123,7 +123,7 @@ method setPos(turtle: Turtle, x, y: float) {.base.} =
     turtle.updateRot()
 
 method setPos(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
-    # Convenience method to allow tuples \
+    # Convenience method to allow tuples
     # instead of seperate values in function call
     turtle.setPos(pos.x, pos.y)
 
@@ -142,7 +142,7 @@ method goto*(turtle: Turtle, x, y: float) {.base.} =
     turtle.setPos(x, y)
 
 method goto*(turtle: Turtle, pos: tuple[x, y: float]) {.base.} =
-    ## Convenience method to allow tuples \
+    ## Convenience method to allow tuples
     ## instead of seperate values in function call
     turtle.goto(pos.x, pos.y)
 
