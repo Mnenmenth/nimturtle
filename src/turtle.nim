@@ -177,6 +177,12 @@ method setColor*(turtle: Turtle, r: int, g: int, b: int) {.base.} =
     turtle.color.g = g
     turtle.color.b = b
 
+method setColor*(turtle: Turtle, color: tuple[r: int, g: int, b: int]) {.base.} =
+    ## Convenience method for setColor to allow tuples
+    turtle.color.r = color.r
+    turtle.color.g = color.g
+    turtle.color.b = color.b
+
 method getSpeed*(turtle: Turtle): int {.base.} =
     ## Returns the current speed of the turtle
     turtle.speed

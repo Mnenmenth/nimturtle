@@ -1260,6 +1260,8 @@ function main() {
     title="getColor*(turtle: Turtle): tuple[r: int, g: int, b: int]"><wbr />get<wbr />Color<span class="attachedType" style="visibility:hidden"></span></a></li>
   <li><a class="reference" href="#setColor.e,Turtle,int,int,int"
     title="setColor*(turtle: Turtle; r: int; g: int; b: int)"><wbr />set<wbr />Color<span class="attachedType" style="visibility:hidden"></span></a></li>
+  <li><a class="reference" href="#setColor.e,Turtle,tuple[int,int,int]"
+    title="setColor*(turtle: Turtle; color: tuple[r: int, g: int, b: int])"><wbr />set<wbr />Color<span class="attachedType" style="visibility:hidden"></span></a></li>
   <li><a class="reference" href="#getSpeed.e,Turtle"
     title="getSpeed*(turtle: Turtle): int"><wbr />get<wbr />Speed<span class="attachedType" style="visibility:hidden"></span></a></li>
   <li><a class="reference" href="#setSpeed.e,Turtle,int"
@@ -1376,6 +1378,11 @@ Returns current color of the turtle
 Set the color of the turtle
 
 </dd>
+<dt id="setColor"><a name="setColor.e,Turtle,tuple[int,int,int]"></a><pre><span class="Keyword">method</span> <span class="Identifier">setColor</span><span class="Operator">*</span><span class="Other">(</span><span class="Identifier">turtle</span><span class="Other">:</span> <span class="Identifier">Turtle</span><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">)</span> <span class="Other pragmabegin">{.</span><div class="pragma"><span class="Identifier">base</span></div><span class="Other pragmaend">.}</span></pre></dt>
+<dd>
+Convenience method for setColor to allow tuples
+
+</dd>
 <dt id="getSpeed"><a name="getSpeed.e,Turtle"></a><pre><span class="Keyword">method</span> <span class="Identifier">getSpeed</span><span class="Operator">*</span><span class="Other">(</span><span class="Identifier">turtle</span><span class="Other">:</span> <span class="Identifier">Turtle</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other pragmabegin">{.</span><div class="pragma"><span class="Identifier">base</span></div><span class="Other pragmaend">.}</span></pre></dt>
 <dd>
 Returns the current speed of the turtle
@@ -1446,7 +1453,7 @@ Alias method for pd()
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2017-11-09 22:45:36 UTC</small>
+        <small>Made with Nim. Generated: 2017-11-13 08:44:01 UTC</small>
       </div>
     </div>
   </div>
