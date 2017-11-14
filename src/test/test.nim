@@ -92,8 +92,6 @@ for i in 0..360:
 turtle.setSkipAnimation(false)
 bob.fd(20)
 
-let h = if 3 == 3: true else: false
-
 larry.setSpeed(5)
 larry.layerCake()
 
