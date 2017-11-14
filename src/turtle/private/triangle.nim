@@ -62,8 +62,11 @@ method rotate*(triangle: Triangle, angle: float) {.base.} =
     triangle.vert3.rotPoint(triangle.vert1, angle)
 
 method orderedVertices(triangle: Triangle): Triangle {.base.} =
+    # Sorts triangle vertices into decending order based on y coordinate
 
+    # Array to hold ordered vertices
     var ordered: array[3, Coordinate]
+
     # Lowest Y
     if triangle.vert1.y < triangle.vert2.y:
         if triangle.vert1.y < triangle.vert3.y:
@@ -75,6 +78,7 @@ method orderedVertices(triangle: Triangle): Triangle {.base.} =
             ordered[0] = triangle.vert2
         else:
             ordered[0] = triangle.vert3
+
     # Highest Y
     if triangle.vert1.y > triangle.vert2.y:
         if triangle.vert1.y > triangle.vert3.y:
@@ -87,6 +91,7 @@ method orderedVertices(triangle: Triangle): Triangle {.base.} =
         else:
             ordered[2] = triangle.vert3
         
+    # Determine which vertice is in the middle
     if ordered.contains(triangle.vert1) and ordered.contains(triangle.vert3):
         ordered[1] = triangle.vert2
     elif ordered.contains(triangle.vert1) and ordered.contains(triangle.vert2):
@@ -94,49 +99,69 @@ method orderedVertices(triangle: Triangle): Triangle {.base.} =
     elif ordered.contains(triangle.vert2) and ordered.contains(triangle.vert3):
         ordered[1] = triangle.vert1
 
+    # Create a new triangle with the ordered vertices
     Triangle(vert1: ordered[2], vert2: ordered[1], vert3: ordered[0])
 
 method fillBottomFlat(triangle: PTriangle, renderer: sdl.Renderer) {.base.} =
+    # Fills a triangle with a flat bottom
+
+    # Reference to actual vertices for shorter names
     let v1 = triangle.vert1
     let v2 = triangle.vert2
     let v3 = triangle.vert3
 
+    # Find the inverted slopes of the triangle
     let invslope1 = (v2.x - v1.x) / (v2.y - v1.y)
     let invslope2 = (v3.x - v1.x) / (v3.y - v1.y)
 
+    # Current x values for incrementing in loop
     var curx1 = v1.x.float
     var curx2 = v1.x.float
 
     for scanY in v1.y .. v2.y:
+        # Go through and draw each horizontal line in the given triangle
         discard renderer.renderDrawLine(curx1.int, scanY, curx2.int, scanY)
+        # Increment the start and end x for the line
         curx1 += invslope1
         curx2 += invslope2
 
 method fillTopFlat(triangle: PTriangle, renderer: sdl.Renderer) {.base} =
+    # Fills a triangle with a flat top
+
+    # Reference to actual vertices for shorter names
     let v1 = triangle.vert1
     let v2 = triangle.vert2
     let v3 = triangle.vert3
 
+    # Find the inverted slopes of the triangle
     let invslope1 = (v3.x - v1.x) / (v3.y - v1.y)
     let invslope2 = (v3.x - v2.x) / (v3.y - v2.y)
 
+    # Current x values for incrementing in loop
     var curx1 = v3.x.float
     var curx2 = v3.x.float
 
     for scanY in countdown(v3.y, v1.y):
+        # Go through and draw each hotizontal line in the given triangle
         discard renderer.renderDrawLine(curx1.int, scanY, curx2.int, scanY)
+        # Increment the start and end x for the line
         curx1 -= invslope1
         curx2 -= invslope2
 
 method fillPixels(triangle: PTriangle, renderer: sdl.Renderer) {.base.} = 
+    # Reference to actual vertices for shorter names
     let v1 = triangle.vert1
     let v2 = triangle.vert2
     let v3 = triangle.vert3
     
+    # If the triangle i flat bottomed, use flat bottom fill
     if v2.y == v3.y:
         triangle.fillBottomFlat(renderer)
+    # If the triangle is flat topped, use flat top fill
     elif v1.y == v2.y:
         triangle.fillTopFlat(renderer)
+    # If the triangle is neither, cut the triangle in half, then treat the halves as two seperate triangles,
+    # One with a flat bottom, and one with a flat top
     else:
         let v4 = newPoint((v1.x.float + ((v2.y - v1.y) / (v3.y - v1.y)) * (v3.x - v1.x).float).int, v2.y)
         newPTriangle(v1, v2, v4).fillBottomFlat(renderer)
@@ -149,7 +174,7 @@ method drawTriangle*(triangle: Triangle, filled: bool, g: Graph, renderer: sdl.R
     let ordered = triangle.orderedVertices()
 
     let conv = ordered.convPixel(g)
-    # Draw the sides of the triangle between the vertices
+    # Draw the triangle
     if filled:
         conv.fillPixels(renderer)
     else:
