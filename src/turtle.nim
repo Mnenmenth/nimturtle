@@ -258,7 +258,7 @@ method penDown*(turtle: Turtle) {.base.} =
 
 method draw(turtle: Turtle, renderer: sdl.Renderer) {.base.} =
     # Draw the turtle shape onto the screen
-    turtle.shape.drawTriangle(g, renderer)
+    turtle.shape.drawTriangle(true, g, renderer)
 
 method init(app: App): bool {.base.} =
     # Only initialize sdl if it has not already been initialized
