@@ -59,6 +59,7 @@ let larry = newTurtle()
 larry.setSpeed(100)
 larry.pd()
 
+bob.setColor(20, 100, 255)
 bob.lt(90)
 larry.lt(60)
 bob.fd(20)
@@ -83,6 +84,8 @@ bob.lt(30)
 bob.fd(10)
 
 bob.lt(90)
+
+bob.setColor(100, 100, 100)
 
 turtle.setSkipAnimation(true)
 for i in 0..360:

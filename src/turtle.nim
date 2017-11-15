@@ -258,6 +258,7 @@ method penDown*(turtle: Turtle) {.base.} =
 
 method draw(turtle: Turtle, renderer: sdl.Renderer) {.base.} =
     # Draw the turtle shape onto the screen
+    discard renderer.setRenderDrawColor(uint8(turtle.color.r), uint8(turtle.color.g), uint8(turtle.color.b), 0)
     turtle.shape.drawTriangle(true, g, renderer)
 
 method init(app: App): bool {.base.} =
