@@ -41,7 +41,7 @@ type
 const
     # Constants for sdl window
     Title = "Turtle"
-    Width = 1270
+    Width = 1280
     Height = 720
     WindowFlags = 0
     RenderFlags = 0
