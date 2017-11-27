@@ -7,4 +7,4 @@
 - [x] Only update turtle on a per-command basis (allowing user input between movements)
 - [x] Turtle.done() function at end that runs mainloop to keep window running and graphics drawn
 - [x] Documentation
-- [ ] Fill turtle cursor
+- [x] Fill turtle cursor
