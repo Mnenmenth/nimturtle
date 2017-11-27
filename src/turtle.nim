@@ -198,15 +198,8 @@ method fd*(turtle: Turtle, dist: float) {.base.} =
     let x = turtle.shape.vert1.x.float + dist * cos(turtle.heading * (PI/180))
     let y = turtle.shape.vert1.y.float + dist * sin(turtle.heading * (PI/180))
 
-    # 
-    #[let round_to: float = 4
-    let roundnum = 10 * round_to
-
-    let roundx = round(x * roundnum) / roundnum
-    let roundy = round(y * roundnum) / roundnum]#
-
     # Apply new position
-    turtle.goto(x, y)#roundx, roundy)
+    turtle.goto(x, y)
 
     # If skipAnimation is false, animate the movement
     if not skipAnimation: updateScreen(newManager=true)

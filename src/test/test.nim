@@ -55,6 +55,8 @@ let bob = newTurtle()
 bob.pd()
 bob.setSpeed(50)
 
+bob.rt(35)
+
 let larry = newTurtle()
 larry.setSpeed(100)
 larry.pd()
@@ -66,9 +68,6 @@ bob.fd(20)
 
 bob.lt(90)
 bob.fd(20)
-
-#let dist = parseFloat(readLineFromStdin "Input a distance: ")
-#larry.fd(dist)
 
 bob.lt(90)
 bob.fd(20)
