@@ -5,9 +5,11 @@
 #  https://mnenmenth.com
 
 import sdl2.sdl
-import graph
+import libgraph
 import algorithm
 import math
+
+import ../private/application
 
 type
     Triangle* = ref object of RootObj
@@ -18,18 +20,19 @@ type
 
 type
     PTriangle = ref object of RootObj
-        vert1*: graph.Point
-        vert2*: graph.Point
-        vert3*: graph.Point
+        ## Triangle made of pixels points rather than coordinates (for rendering)
+        vert1*: libgraph.Point
+        vert2*: libgraph.Point
+        vert3*: libgraph.Point
 
 proc newTriangle*(vert1, vert2, vert3: Coordinate): Triangle =
     ## Creates new triangle of given vertices
     Triangle(vert1: vert1, vert2: vert2, vert3: vert3)
 
-proc newPTriangle(vert1, vert2, vert3: graph.Point): PTriangle =
+proc newPTriangle(vert1, vert2, vert3: libgraph.Point): PTriangle =
     PTriangle(vert1: vert1, vert2: vert2, vert3: vert3)
 
-method convPixel(triangle: Triangle, g: Graph): PTriangle {.base.} =
+method convPixel(triangle: Triangle): PTriangle {.base.} =
     newPTriangle(g.c2p(triangle.vert1), g.c2p(triangle.vert2), g.c2p(triangle.vert3))
 
 method rotPoint(affected: var Coordinate, triangle_point: var Coordinate, angle: float) {.base.} =
@@ -167,17 +170,17 @@ method fillPixels(triangle: PTriangle, renderer: sdl.Renderer) {.base.} =
         newPTriangle(v1, v2, v4).fillBottomFlat(renderer)
         newPTriangle(v2, v4, v3).fillTopFlat(renderer)
 
-method drawTriangle*(triangle: Triangle, filled: bool, g: Graph, renderer: sdl.Renderer) {.base.} =
+method drawTriangle*(triangle: Triangle, filled: bool) {.base.} =
     ## Draws the triangle
 
     # Convert the coordinate unit points into pixels on the screen
     let ordered = triangle.orderedVertices()
 
-    let conv = ordered.convPixel(g)
+    let conv = ordered.convPixel()
     # Draw the triangle
     if filled:
-        conv.fillPixels(renderer)
+        conv.fillPixels(app.renderer)
     else:
-        discard renderer.renderDrawLine(conv.vert1.x, conv.vert1.y, conv.vert2.x, conv.vert2.y)
-        discard renderer.renderDrawLine(conv.vert2.x, conv.vert2.y, conv.vert3.x, conv.vert3.y)
-        discard renderer.renderDrawLine(conv.vert1.x, conv.vert1.y, conv.vert3.x, conv.vert3.y)
+        discard app.renderer.renderDrawLine(conv.vert1.x, conv.vert1.y, conv.vert2.x, conv.vert2.y)
+        discard app.renderer.renderDrawLine(conv.vert2.x, conv.vert2.y, conv.vert3.x, conv.vert3.y)
+        discard app.renderer.renderDrawLine(conv.vert1.x, conv.vert1.y, conv.vert3.x, conv.vert3.y)

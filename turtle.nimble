@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.7"
+version       = "0.3.0"
 author        = "Earl Kennedy"
 description   = "Turtle Graphics using SDL"
 license       = "MIT"
@@ -15,6 +15,7 @@ skipExt       = @["exe"]
 
 requires "nim >= 0.17.2"
 requires "sdl2_nim"
+requires "libgraph"
 
 import distros
 foreignDep "sdl2"

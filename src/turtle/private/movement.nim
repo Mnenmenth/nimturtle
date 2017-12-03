@@ -4,9 +4,11 @@
 #  https://github.com/Mnenmenth                        
 #  https://mnenmenth.com
 
-import graph
-import line
+import libgraph
 import sdl2.sdl
+
+import application
+import ../shapes/line
 
 type
     Movement* = ref object of RootObj
@@ -21,6 +23,6 @@ proc newMovement*(line: Line, heading: float, color: tuple[r, g, b: int], visibl
     ## Creates a new movement
     Movement(line: line, heading: heading, color: color, visible: visible, animated: animated)
 
-method draw*(movement: Movement, g: Graph, renderer: sdl.Renderer) {.base.} =
+method draw*(movement: Movement) {.base.} =
     ## Draws the movement
-    movement.line.draw(g, renderer)
+    movement.line.draw()

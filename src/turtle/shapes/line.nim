@@ -4,8 +4,10 @@
 #  https://github.com/Mnenmenth                        
 #  https://mnenmenth.com
 
-import graph
+import libgraph
 import sdl2.sdl
+
+import ../private/application
 
 type
     Line* = ref object of RootObj
@@ -21,11 +23,11 @@ proc newLine*(lineStart, lineEnd: tuple[x: float, y: float]): Line =
     ## Creates new line from tuples
     newLine(newCoordinate(lineStart.x, lineStart.y), newCoordinate(lineEnd.x, lineEnd.y))
 
-method draw*(line: Line, g: Graph, renderer: sdl.Renderer) {.base.} =
+method draw*(line: Line) {.base.} =
     ## Draws the line
 
     # Converts line points from coordinate unit points to pixel points on screen
     # Then draws line between points
     let lineStart = g.c2p(line.lineStart)
     let lineEnd = g.c2p(line.lineEnd)
-    discard sdl.renderDrawLine(renderer, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y)
+    discard sdl.renderDrawLine(app.renderer, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y)
