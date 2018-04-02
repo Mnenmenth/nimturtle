@@ -189,7 +189,10 @@ method getSpeed*(turtle: Turtle): int {.base.} =
 
 method setSpeed*(turtle: Turtle, speed: int) {.base.} =
     ## Set the speed of the turtle
-    turtle.speed = speed
+    if speed <= 0:
+        raise newException(DivByZeroError, "Speed cannot be zero")
+    else:
+        turtle.speed = speed
 
 method fd*(turtle: Turtle, dist: float) {.base.} = 
     ## Moves the turtle fd by given distance based on current heading
